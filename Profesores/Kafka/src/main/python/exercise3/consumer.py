@@ -15,12 +15,12 @@ def read_ccloud_config(config_file):
     return conf
 
 
-props = read_ccloud_config("exercise3/client.properties")
+props = read_ccloud_config("Profesores/Kafka/src/main/python/exercise3/client.properties")
 props["group.id"] = "python-group-1"
 props["auto.offset.reset"] = "earliest"
 
 consumer = Consumer(props)
-consumer.subscribe(["topic_python1"])
+consumer.subscribe(["topic_python"])
 
 try:
     while True:

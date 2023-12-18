@@ -16,16 +16,16 @@ def read_ccloud_config(config_file):
 
 
 
-producer = Producer(read_ccloud_config("exercise3/client.properties"))
+producer = Producer(read_ccloud_config("Profesores/Kafka/src/main/python/exercise3/client.properties"))
 
 
 # Send 100 messages where the key is the index and the message to send is "test message - index"
 # the topic name is myTopic
 
-topic_kafka = 'topic_python1'
+topic_kafka = 'topic_python'
 
 for e in range(100):
-    data = {'New message - ': e*4}
+    data = {'Hola Soy Lu - ': e*4}
     data_str = dumps(data)  # Serialize dictionary to a string
     data_bytes = data_str.encode('utf-8')  # Encode string to bytes
     key = str(e).encode('utf-8')

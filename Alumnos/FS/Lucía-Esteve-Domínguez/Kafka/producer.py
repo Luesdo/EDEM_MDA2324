@@ -1,37 +1,29 @@
-import time
-from json import dumps
 from confluent_kafka import Producer
-import re
+from datos import Cotizacion
+import json
+import time
 
-# Configuración del productor
-config = {
-    'bootstrap.servers': 'localhost:9092',  # Cambia esto con la dirección de tu servidor Kafka
+registros_cotizacion = [Cotizacion() for _ in range(50)]
+
+registros_cotizacion.sort(key=lambda x: x.fecha)
+
+producer_conf = {
+    'bootstrap.servers': 'localhost:9092',
     'client.id': 'python-producer'
 }
+producer = Producer(producer_conf)
 
-# Crear un productor
-producer = Producer(config)
+def delivery_report(err, msg):
+    if err is not None:
+        print(f'Message delivery failed: {err}')
+    else:
+        print(f'Message delivered to {msg.topic()} [{msg.partition()}]')
 
+# Enviar los registros
+for cotizacion_instance in registros_cotizacion:
+    cotizacion_json = cotizacion_instance.to_json()
+    producer.produce('prueba1', cotizacion_json.encode('utf-8'), callback=delivery_report)
+    producer.poll(0)
+    time.sleep(1)  # Espera 2 segundo antes de enviar el siguiente registro
 
-topic_kafka = 'mercados'
-
-file1 = open('/Users/Lucia/Documents/GitHub/EDEM_MDA2324/Alumnos/FS/Lucía-Esteve-Domínguez/Kafka/archivo.py',encoding="utf8")
-Lines = file1.readlines()
- 
-count = 0
-# Strips the newline character
-for line in Lines:
-    time.sleep(2)
-    print( line.strip() + "\n")
-    words = re.findall(r"[\w']+|[.,!?;]", line)
-    for word in words:
-        data_bytes = word  # Encode string to bytes
-        key = str(count)
-        producer.produce(topic=topic_kafka, value=data_bytes, key=key)  # Send bytes
-        # After your loop where you send messages:
-        producer.flush()
-      
-
-# Optionally, you can check if there are any messages that failed to be delivered:
-if producer.flush() != 0:
-    print("Some messages failed to be delivered")
+producer.flush()

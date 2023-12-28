@@ -4,6 +4,7 @@
 import random
 import pandas as pd
 from datetime import datetime, timedelta
+import json
 
 #Definir los mercados, los indices y las empresas 
 class Cotizacion:
@@ -84,9 +85,7 @@ class Cotizacion:
         tiempo_entre_fechas = end_date - start_date
         dias_aleatorios = random.randrange(tiempo_entre_fechas.days)
         fecha_aleatoria = start_date + timedelta(days=dias_aleatorios)
-            # Formatear la fecha directamente
-        fecha_hora_aleatoria = fecha_aleatoria.strftime('%d/%m/%Y %H:%M:%S')
-        return fecha_hora_aleatoria
+        return fecha_aleatoria
        
 
     def __init__(self): 
@@ -94,26 +93,11 @@ class Cotizacion:
         self.indice = self.lista_empresas[self.empresa]
         self.bolsa = self.lista_bolsas[self.indice]
         self.precio = random.uniform(0,100)
-        self.fecha = self.generar_fecha_aleatoria()
+        self.fecha = Cotizacion.generar_fecha_aleatoria()
 
-#GENERACIÓN DATA SET Y ALMACENAMIENTO EN DF:
-registros = [Cotizacion() for _ in range(1000)]
+    def to_json(self):
+        data = self.__dict__.copy()
+        data['fecha'] = self.fecha.strftime('%Y-%m-%d %H:%M:%S')
+        return json.dumps(data)
 
-data = {
-'empresa': [registro.empresa for registro in registros],
-'indice': [registro.indice for registro in registros],
-'bolsa': [registro.bolsa for registro in registros],
-'precio': [registro.precio for registro in registros],
-'Fecha': [registro.fecha for registro in registros],
-}
 
-df_cotizacion = pd.DataFrame(data)
-
-#ORGANIZAMOS EL DATA SET POR FECHA (DE MÁS ANTIGUO A MÁS RECIENTE)
-df_cotizacion['Fecha'] = pd.to_datetime(df_cotizacion['Fecha'])
-df_cotizacion['Fecha'] = df_cotizacion['Fecha'].dt.strftime('%d/%m/%Y%H:%M:')
-df_cotizacion = df_cotizacion.sort_values(by='Fecha')
-df_cotizacion = df_cotizacion.reset_index(drop=True)
-
-# Visualizar el DataFrame
-print(df_cotizacion.head(100))
